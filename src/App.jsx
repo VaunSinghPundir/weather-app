@@ -10,7 +10,44 @@ function App() {
   const [units, setUnits] = useState("metric");
 
   const [bg, setBg] = useState(hotBg);
-
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(successFunction, errorFunction);
+  }
+  
+  function successFunction(position) {
+    var lat = position.coords.latitude;
+    var long = position.coords.longitude;
+    var geocoder = new google.maps.Geocoder();
+    var latlng = new google.maps.LatLng(lat, long);
+    geocoder.geocode({ 'latLng': latlng }, function (results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        if (results[0]) {
+          var city = null;
+          for (var i = 0; i < results[0].address_components.length; i++) {
+            var component = results[0].address_components[i];
+            if (component.types.includes('locality')) {
+              city = component.long_name;
+              break;
+            }
+          }
+          if (city) {
+            console.log('City: ' + city);
+          } else {
+            console.log('City not found');
+          }
+        } else {
+          console.log('No results found');
+        }
+      } else {
+        console.log('Geocoder failed due to: ' + status);
+      }
+    });
+  }
+  
+  function errorFunction() {
+    console.log('Geolocation failed');
+  }
+  
 
 
   useEffect(() => {
